@@ -9,6 +9,7 @@ Grid::Grid(int width, int height)
         nodes[y].resize(width);
 
         for (int x = 0; x < width; x++) {
+
             nodes[y][x].x = x;
             nodes[y][x].y = y;
 
@@ -23,7 +24,10 @@ Grid::Grid(int width, int height)
 }
 
 Node* Grid::getNode(int x, int y) {
-    if (x < 0 || x >= width || y < 0 || y >= height) {
+
+    if (x < 0 || x >= width ||
+        y < 0 || y >= height) {
+
         return nullptr;
     }
 
@@ -36,4 +40,33 @@ int Grid::getWidth() const {
 
 int Grid::getHeight() const {
     return height;
+}
+
+void Grid::draw(sf::RenderWindow& window, float cellSize) {
+
+    sf::RectangleShape cell;
+
+    cell.setSize(
+        sf::Vector2f(cellSize - 1, cellSize - 1)
+    );
+
+    for (int y = 0; y < height; y++) {
+
+        for (int x = 0; x < width; x++) {
+
+            cell.setPosition(
+                x * cellSize,
+                y * cellSize
+            );
+
+            if (nodes[y][x].obstacle) {
+                cell.setFillColor(sf::Color::Black);
+            }
+            else {
+                cell.setFillColor(sf::Color::White);
+            }
+
+            window.draw(cell);
+        }
+    }
 }

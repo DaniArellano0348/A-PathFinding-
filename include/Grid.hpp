@@ -2,6 +2,7 @@
 #define GRID_HPP
 
 #include <vector>
+#include <SFML/Graphics.hpp>
 #include "Node.hpp"
 
 class Grid {
@@ -18,6 +19,6 @@ public:
 
     int getWidth() const;
     int getHeight() const;
-};
 
-#endif
+    void draw(sf::RenderWindow& window, float cellSize);
+};
