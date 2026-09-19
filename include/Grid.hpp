@@ -22,3 +22,5 @@ public:
 
     void draw(sf::RenderWindow& window, float cellSize);
 };
+
+#endif
