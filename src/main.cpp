@@ -9,7 +9,7 @@
 int main() {
 
     // =========================
-    // CONFIGURACIÓN DE VENTANA
+    // CONFIGURACIÓN
     // =========================
 
     const int WINDOW_WIDTH = 800;
@@ -45,7 +45,7 @@ int main() {
 
 
     // =========================
-    // NODO INICIAL Y FINAL
+    // NODO INICIAL Y OBJETIVO
     // =========================
 
     Node* start =
@@ -56,27 +56,24 @@ int main() {
 
 
     // =========================
-    // CREAR OBSTÁCULOS
+    // CREAR OBSTÁCULOS INICIALES
     // =========================
 
-    grid.setObstacle(
-        5, 5, true
-    );
-
-    grid.setObstacle(
-        6, 5, true
-    );
-
-    grid.setObstacle(
-        7, 5, true
-    );
+    grid.setObstacle(5, 5, true);
+    grid.setObstacle(6, 5, true);
+    grid.setObstacle(7, 5, true);
 
 
     // =========================
-    // EJECUTAR A*
+    // CREAR ALGORITMO A*
     // =========================
 
     AStar astar(grid);
+
+
+    // =========================
+    // CALCULAR CAMINO INICIAL
+    // =========================
 
     std::vector<Node*> path =
         astar.findPath(
@@ -85,30 +82,10 @@ int main() {
         );
 
 
-    // =========================
-    // MOSTRAR RESULTADO
-    // =========================
-
     std::cout
         << "Nodos en el camino: "
         << path.size()
         << std::endl;
-
-
-    std::cout
-        << "Camino: ";
-
-    for (Node* node : path) {
-
-        std::cout
-            << "("
-            << node->x
-            << ","
-            << node->y
-            << ") ";
-    }
-
-    std::cout << std::endl;
 
 
     // =========================
@@ -119,9 +96,11 @@ int main() {
 
         sf::Event event;
 
-        while (
-            window.pollEvent(event)
-        ) {
+        while (window.pollEvent(event)) {
+
+            // =========================
+            // CERRAR VENTANA
+            // =========================
 
             if (
                 event.type ==
@@ -129,6 +108,92 @@ int main() {
             ) {
 
                 window.close();
+            }
+
+
+            // =========================
+            // CLIC DEL MOUSE
+            // =========================
+
+            if (
+                event.type ==
+                sf::Event::MouseButtonPressed
+            ) {
+
+                if (
+                    event.mouseButton.button ==
+                    sf::Mouse::Left
+                ) {
+
+                    // Posición del mouse
+                    int mouseX =
+                        event.mouseButton.x;
+
+                    int mouseY =
+                        event.mouseButton.y;
+
+
+                    // Convertir píxeles
+                    // a coordenadas del grid
+                    int gridX =
+                        static_cast<int>(
+                            mouseX / CELL_SIZE
+                        );
+
+                    int gridY =
+                        static_cast<int>(
+                            mouseY / CELL_SIZE
+                        );
+
+
+                    // Obtener nodo seleccionado
+                    Node* selectedNode =
+                        grid.getNode(
+                            gridX,
+                            gridY
+                        );
+
+
+                    // Verificar que exista
+                    if (
+                        selectedNode != nullptr
+                    ) {
+
+                        // No permitir colocar
+                        // obstáculos en inicio
+                        // o objetivo
+                        if (
+                            selectedNode != start &&
+                            selectedNode != goal
+                        ) {
+
+                            // Cambiar estado
+                            bool newState =
+                                !selectedNode->obstacle;
+
+                            grid.setObstacle(
+                                gridX,
+                                gridY,
+                                newState
+                            );
+
+
+                            // Recalcular A*
+                            path =
+                                astar.findPath(
+                                    start,
+                                    goal
+                                );
+
+
+                            // Mostrar resultado
+                            std::cout
+                                << "Nodos en el camino: "
+                                << path.size()
+                                << std::endl;
+                        }
+                    }
+                }
             }
         }
 
@@ -141,6 +206,7 @@ int main() {
             sf::Color::White
         );
 
+
         grid.draw(
             window,
             CELL_SIZE,
@@ -149,8 +215,10 @@ int main() {
             path
         );
 
+
         window.display();
     }
+
 
     return 0;
 }
