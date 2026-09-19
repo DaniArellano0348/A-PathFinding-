@@ -2,6 +2,7 @@
 #define NODE_HPP
 
 struct Node {
+
     int x;
     int y;
 

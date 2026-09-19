@@ -2,11 +2,33 @@
 #define ASTAR_HPP
 
 #include <vector>
+
 #include "Node.hpp"
+#include "Grid.hpp"
 
 class AStar {
+
+private:
+
+    Grid& grid;
+
+    float heuristic(
+        Node* a,
+        Node* b
+    );
+
+    std::vector<Node*> getNeighbors(
+        Node* node
+    );
+
 public:
-    std::vector<Node*> findPath(Node* start, Node* goal);
+
+    AStar(Grid& grid);
+
+    std::vector<Node*> findPath(
+        Node* start,
+        Node* goal
+    );
 };
 
 #endif

@@ -1,4 +1,6 @@
 #include "Grid.hpp"
+#include <algorithm>
+#include <limits>
 
 Grid::Grid(int width, int height)
     : width(width), height(height) {
@@ -6,6 +8,7 @@ Grid::Grid(int width, int height)
     nodes.resize(height);
 
     for (int y = 0; y < height; y++) {
+
         nodes[y].resize(width);
 
         for (int x = 0; x < width; x++) {
@@ -13,11 +16,17 @@ Grid::Grid(int width, int height)
             nodes[y][x].x = x;
             nodes[y][x].y = y;
 
-            nodes[y][x].g = 0;
+            // Valores iniciales para A*
+            nodes[y][x].g =
+                std::numeric_limits<float>::infinity();
+
             nodes[y][x].h = 0;
-            nodes[y][x].f = 0;
+
+            nodes[y][x].f =
+                std::numeric_limits<float>::infinity();
 
             nodes[y][x].obstacle = false;
+
             nodes[y][x].parent = nullptr;
         }
     }
@@ -42,12 +51,30 @@ int Grid::getHeight() const {
     return height;
 }
 
-void Grid::draw(sf::RenderWindow& window, float cellSize) {
+void Grid::setObstacle(int x, int y, bool obstacle) {
+
+    Node* node = getNode(x, y);
+
+    if (node != nullptr) {
+        node->obstacle = obstacle;
+    }
+}
+
+void Grid::draw(
+    sf::RenderWindow& window,
+    float cellSize,
+    Node* start,
+    Node* goal,
+    const std::vector<Node*>& path
+) {
 
     sf::RectangleShape cell;
 
     cell.setSize(
-        sf::Vector2f(cellSize - 1, cellSize - 1)
+        sf::Vector2f(
+            cellSize - 1,
+            cellSize - 1
+        )
     );
 
     for (int y = 0; y < height; y++) {
@@ -59,11 +86,52 @@ void Grid::draw(sf::RenderWindow& window, float cellSize) {
                 y * cellSize
             );
 
-            if (nodes[y][x].obstacle) {
-                cell.setFillColor(sf::Color::Black);
+            Node* node = &nodes[y][x];
+
+            // Nodo inicial
+            if (node == start) {
+
+                cell.setFillColor(
+                    sf::Color::Green
+                );
             }
+
+            // Nodo objetivo
+            else if (node == goal) {
+
+                cell.setFillColor(
+                    sf::Color::Red
+                );
+            }
+
+            // Obstáculos
+            else if (node->obstacle) {
+
+                cell.setFillColor(
+                    sf::Color::Black
+                );
+            }
+
+            // Camino encontrado por A*
+            else if (
+                std::find(
+                    path.begin(),
+                    path.end(),
+                    node
+                ) != path.end()
+            ) {
+
+                cell.setFillColor(
+                    sf::Color::Blue
+                );
+            }
+
+            // Celda normal
             else {
-                cell.setFillColor(sf::Color::White);
+
+                cell.setFillColor(
+                    sf::Color::White
+                );
             }
 
             window.draw(cell);
