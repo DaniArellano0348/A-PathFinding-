@@ -56,35 +56,166 @@ int main() {
 
 
     // =========================
-    // CREAR OBSTÁCULOS INICIALES
-    // =========================
-
-    grid.setObstacle(5, 5, true);
-    grid.setObstacle(6, 5, true);
-    grid.setObstacle(7, 5, true);
-
-
-    // =========================
-    // CREAR ALGORITMO A*
+    // ALGORITMO A*
     // =========================
 
     AStar astar(grid);
 
 
     // =========================
-    // CALCULAR CAMINO INICIAL
+    // VARIABLES
     // =========================
 
-    std::vector<Node*> path =
-        astar.findPath(
-            start,
-            goal
-        );
+    std::vector<Node*> path;
 
+
+    // =========================
+    // MAPA NORMAL
+    // =========================
+
+    auto mapaNormal = [&]() {
+
+        // Limpiar obstáculos
+
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+
+            for (int x = 0; x < GRID_WIDTH; x++) {
+
+                grid.setObstacle(
+                    x,
+                    y,
+                    false
+                );
+            }
+        }
+
+
+        // Crear algunos obstáculos
+
+        grid.setObstacle(5, 5, true);
+        grid.setObstacle(6, 5, true);
+        grid.setObstacle(7, 5, true);
+
+
+        // Calcular camino
+
+        path =
+            astar.findPath(
+                start,
+                goal
+            );
+
+
+        std::cout
+            << "\n=== MAPA NORMAL ==="
+            << std::endl;
+
+
+        if (path.empty()) {
+
+            std::cout
+                << "No existe un camino."
+                << std::endl;
+
+        }
+        else {
+
+            std::cout
+                << "Nodos en el camino: "
+                << path.size()
+                << std::endl;
+        }
+    };
+
+
+    // =========================
+    // MAPA BLOQUEADO
+    // =========================
+
+    auto mapaBloqueado = [&]() {
+
+        // Limpiar obstáculos
+
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+
+            for (int x = 0; x < GRID_WIDTH; x++) {
+
+                grid.setObstacle(
+                    x,
+                    y,
+                    false
+                );
+            }
+        }
+
+
+        // Crear pared vertical completa
+
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+
+            grid.setObstacle(
+                10,
+                y,
+                true
+            );
+        }
+
+
+        // Calcular camino
+
+        path =
+            astar.findPath(
+                start,
+                goal
+            );
+
+
+        std::cout
+            << "\n=== MAPA BLOQUEADO ==="
+            << std::endl;
+
+
+        if (path.empty()) {
+
+            std::cout
+                << "No existe un camino entre "
+                << "el inicio y el objetivo."
+                << std::endl;
+
+        }
+        else {
+
+            std::cout
+                << "Nodos en el camino: "
+                << path.size()
+                << std::endl;
+        }
+    };
+
+
+    // =========================
+    // MAPA INICIAL
+    // =========================
+
+    mapaNormal();
+
+
+    std::cout << std::endl;
 
     std::cout
-        << "Nodos en el camino: "
-        << path.size()
+        << "Controles:"
+        << std::endl;
+
+    std::cout
+        << "1 - Mapa normal"
+        << std::endl;
+
+    std::cout
+        << "2 - Mapa bloqueado"
+        << std::endl;
+
+    std::cout
+        << "ESC - Salir"
         << std::endl;
 
 
@@ -97,6 +228,7 @@ int main() {
         sf::Event event;
 
         while (window.pollEvent(event)) {
+
 
             // =========================
             // CERRAR VENTANA
@@ -112,87 +244,45 @@ int main() {
 
 
             // =========================
-            // CLIC DEL MOUSE
+            // TECLADO
             // =========================
 
             if (
                 event.type ==
-                sf::Event::MouseButtonPressed
+                sf::Event::KeyPressed
             ) {
 
+
+                // MAPA NORMAL
+
                 if (
-                    event.mouseButton.button ==
-                    sf::Mouse::Left
+                    event.key.code ==
+                    sf::Keyboard::Num1
                 ) {
 
-                    // Posición del mouse
-                    int mouseX =
-                        event.mouseButton.x;
-
-                    int mouseY =
-                        event.mouseButton.y;
+                    mapaNormal();
+                }
 
 
-                    // Convertir píxeles
-                    // a coordenadas del grid
-                    int gridX =
-                        static_cast<int>(
-                            mouseX / CELL_SIZE
-                        );
+                // MAPA BLOQUEADO
 
-                    int gridY =
-                        static_cast<int>(
-                            mouseY / CELL_SIZE
-                        );
+                if (
+                    event.key.code ==
+                    sf::Keyboard::Num2
+                ) {
+
+                    mapaBloqueado();
+                }
 
 
-                    // Obtener nodo seleccionado
-                    Node* selectedNode =
-                        grid.getNode(
-                            gridX,
-                            gridY
-                        );
+                // SALIR
 
+                if (
+                    event.key.code ==
+                    sf::Keyboard::Escape
+                ) {
 
-                    // Verificar que exista
-                    if (
-                        selectedNode != nullptr
-                    ) {
-
-                        // No permitir colocar
-                        // obstáculos en inicio
-                        // o objetivo
-                        if (
-                            selectedNode != start &&
-                            selectedNode != goal
-                        ) {
-
-                            // Cambiar estado
-                            bool newState =
-                                !selectedNode->obstacle;
-
-                            grid.setObstacle(
-                                gridX,
-                                gridY,
-                                newState
-                            );
-
-
-                            // Recalcular A*
-                            path =
-                                astar.findPath(
-                                    start,
-                                    goal
-                                );
-
-
-                            // Mostrar resultado
-                            std::cout
-                                << "Nodos en el camino: "
-                                << path.size()
-                                << std::endl;
-                        }
-                    }
+                    window.close();
                 }
             }
         }
